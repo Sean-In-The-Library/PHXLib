@@ -1,3 +1,18 @@
+---
+title: "Plotting Libraries in Phoenix"
+author: "Sean Harrington"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    df_print: paged
+    theme: flatly
+    highlight: haddock
+    toc: yes
+    toc_float: yes
+    includes:
+      after_body:footer.html
+---
+
 # Let's Find a Local Library!
 
 ## Introduction
