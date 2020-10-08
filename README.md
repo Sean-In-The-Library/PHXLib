@@ -35,5 +35,5 @@ The data from this portal is fairly minimal and requires very little preprosessi
 
 <br>
 
-<h1 id="question_6">The Maps</h2>
+<h1 id="question_6">The Maps</h1>
 
