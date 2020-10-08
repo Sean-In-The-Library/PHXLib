@@ -4,13 +4,10 @@ author: "Sean Harrington"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
-    df_print: paged
-    theme: flatly
-    highlight: haddock
-    toc: yes
-    toc_float: yes
+    theme: united
+    toc: true
     includes:
-      after_body:footer.html
+      after_body: footer.html
 ---
 
 <br>
@@ -27,20 +24,6 @@ This project built on information in a [**Towards Data Science**](https://toward
 
 These maps were built using data from the [**Phoenix, AZ Open Data Portal**](https://www.phoenixopendata.com/dataset/libraries/resource/b7158429-b69e-4f87-8a96-b4857c6d65b5). The data was not linked through the API (since it was broken at the time of creation) so the data is static as of 10/1/2020.
 
-```{r setup, include = FALSE}
-
-# SET UP GLOBAL OPTIONS
-
-knitr::opts_chunk$set(
-	eval = FALSE,
-	fig.width = 10,
-	message = FALSE,
-	warning = FALSE,
-	include = FALSE
-)
-```
-
-
 
 ```{r include = FALSE}
 
@@ -55,7 +38,7 @@ library(dplyr)
 library(leaflet)      #Leaflet makes that map work, baby.
 library(ggplot2)
 library(gsheet)
-library(tidyverse)
+#library(tidyverse)
 library(htmlwidgets)
 library(magrittr)
 #library("DT")
@@ -74,16 +57,21 @@ libraries <- read.csv(text=a, stringsAsFactors=FALSE)
 
 <br>
 
-Explore the first six observations in the following interactive table:
+The data provides us with a series of (semi-useful) headings:
 
 ```{r echo = TRUE}
 
-datatable(libraries, rownames = FALSE, filter = "top", options = list(pageLength = 5, scrollX = T))
+ls(libraries)
 ```
 
 ```{r}
+head(libraries, n=5)
+```
+
+
+```{r}
 m <- leaflet(libraries) %>%
-  addProviderTiles(provier = "Ersi")   # Add default OpenStreetMap map tiles
+  addProviderTiles(provider = "Ersi")   # Add default OpenStreetMap map tiles
   
 m  # Print the map
 ```
@@ -91,6 +79,15 @@ m  # Print the map
 <br>
 
 # Preprocessing
+
+We have two sets (4) of columns that correspond with longitude and latitude. I'm going to change those names to `lng` and `lat` to make it easier for **[Leaflet](https://cran.r-project.org/web/packages/leaflet/index.html)** to read. This isn't necessary but I thought it would be easier since we have another pair of columns that have the `X/Y` values as a backup if we needed that naming convention.
+
+```{r}
+libraries <- libraries %>%
+  rename(lng = DegreesX) %>%
+  rename(lat = DegreesY)
+```
+
 
 The data from this portal is fairly minimal and requires very little preprosessing. For **[Leaflet](https://cran.r-project.org/web/packages/leaflet/index.html)** to work properly, we need more than just the address of the library - which is provided in the dataframe under `libraries$AddressFull`.
 
@@ -108,7 +105,7 @@ We have a series of addresses and X/Y coordinates that correspond with longitude
 For example, if I wanted to find a central location in Phoenix, AZ as the center of my map (we'll adjust the zoom later). I can chose the [Burton Barr Library](https://www.phoenixpubliclibrary.org/Locations/BurtonBarr) and pass the address through `geocode()` like this:
 
 ```{r}
-geocode("1221 N. Central Ave, Phoenix, ArZ 85004")
+#geocode("1221 N. Central Ave, Phoenix, ArZ 85004")
 ```
 <br>
 
@@ -120,8 +117,9 @@ The purpose of this map is to show where all of the libraries are located, so we
 
 ```{r}
 libmap <- leaflet() %>%
-  addMarkers(lng = libraries$DegreesX, lat = libraries$DegreesY) %>%
-  #setView(lng = XXX, lat = XXX, zoom = 13)
+  addMarkers(lng = libraries$lng, lat = libraries$lat)
+   
+libmap
 ```
 
 <br>
@@ -130,8 +128,10 @@ libmap <- leaflet() %>%
 
 To make our map more useful, we'd like some basic information to popup when the user clicks on a marker.  I've chosen the library's website because I feel like that would lead the user to discovering all of the information that they need (from books to lending policies). This information is provided in the dataset so we can link to it using `libraries$PlaceWeb`.
 
-```{r}
-
+```{r eval=FALSE, include=FALSE}
+libmap %>%
+  leftlet() %>%
+  addMarkers(label = libraries$PlaceName)
 ```
 
 
@@ -141,9 +141,37 @@ To make our map more useful, we'd like some basic information to popup when the 
 
 This map is only being used for a single purpose: finding PHX libraries. I don't anticipate that people will use it to look up other locations around the globe so I'm going to lock the panning and zoom functions (to prevent people from accidentally navigating far away or looking for libraries in other counties).  To do that I set the `dragging = FALSE` (panning) and locked the zoom between 14 and 18.
 
-```{r}
-
+```{r eval=FALSE, include=FALSE}
+libmap %>%
+  leftlet() %>%
+addProviderTiles(provier = "Ersi") %>%
+addMarkers(label = museum$museum,
+           popup = libraries$PlaceWeb) %>%
+setView(lat = 33.736309, lng = -84.388298, zoom = 11) %>%
+addMiniMap(
+    toggleDisplay = TRUE,
+    tiles = providers$Stamen.TonerLite
+    )
 ```
 
 # Final Product
+
+```{r eval=FALSE, include=FALSE}
+libmap %>%
+  leftlet() %>%
+addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") %>%
+addLayersControl(baseGroups = c("Toner Lite", "World Imagery")) %>%
+addMarkers(label = museum$museum,
+           popup = libraries$PlaceWeb) %>%
+setView(lat = 33.462314, lng = -112.072916, zoom = 11) %>%
+addMiniMap(
+    toggleDisplay = TRUE,
+    tiles = providers$Stamen.TonerLite
+    )
+```
+
+```{r}
+str(libraries$DegreesX, libraries$DegreesY)
+```
 
