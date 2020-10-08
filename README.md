@@ -13,3 +13,16 @@ This project built on information in a [**Towards Data Science**](https://toward
 ### Data
 
 These maps were built using data from the [**Phoenix, AZ Open Data Portal**](https://www.phoenixopendata.com/dataset/libraries/resource/b7158429-b69e-4f87-8a96-b4857c6d65b5). The data was not linked through the API (since it was broken at the time of creation) so the data is static as of 10/1/2020.
+
+```{r setup, include = FALSE}
+
+# SET UP GLOBAL OPTIONS
+
+knitr::opts_chunk$set(
+	eval = FALSE,
+	fig.width = 10,
+	message = FALSE,
+	warning = FALSE,
+	include = FALSE
+)
+```
